@@ -1083,14 +1083,16 @@
             if (!pred) return;
 
             editingId = id;
-            editSelectedGender = pred.gender;
+            editSelectedGender = pred.gender; // Set to current gender
 
             document.getElementById('editName').value = pred.name;
             document.getElementById('editTime').value = pred.time || '';
             document.getElementById('editWeight').value = pred.weight || '';
 
+            // Reset and set gender buttons
             document.getElementById('editBoyBtn').classList.remove('selected');
             document.getElementById('editGirlBtn').classList.remove('selected');
+            
             if (pred.gender === 'boy') {
                 document.getElementById('editBoyBtn').classList.add('selected');
             } else if (pred.gender === 'girl') {
@@ -1116,10 +1118,16 @@
                 return;
             }
 
+            const newTime = document.getElementById('editTime').value;
+            
             pred.name = name;
-            pred.time = document.getElementById('editTime').value || null;
+            pred.time = newTime || null;
             pred.weight = document.getElementById('editWeight').value.trim() || null;
-            pred.gender = editSelectedGender || null;
+            
+            // Only update gender if one was selected, otherwise keep existing
+            if (editSelectedGender !== null) {
+                pred.gender = editSelectedGender;
+            }
 
             savePredictions();
             renderPredictions();
@@ -1314,7 +1322,7 @@
                 { id: 4, name: 'Morgan', gender: 'girl', weight: '7lb 9oz', time: '2026-02-12T17:18', status: 'active' },
                 { id: 5, name: 'Mark', gender: 'girl', weight: '8lb', time: null, status: 'active' },
                 { id: 6, name: 'Tyler', gender: 'girl', weight: '7lb 7oz', time: '2026-02-12T14:57', status: 'active' },
-                { id: 7, name: 'Jordyn', gender: 'girl', weight: '7lb 13oz', time: null, status: 'active' },
+                { id: 7, name: 'Jordyn', gender: 'girl', weight: '7lb 13oz', time:'2026-02-12T16:12', status: 'active' },
                 { id: 8, name: 'Bella', gender: 'boy', weight: '8lb 10oz', time: '2026-02-12T18:56', status: 'active' },
                 { id: 9, name: 'Brandon', gender: 'girl', weight: '7lb 10oz', time: '2026-02-12T18:15', status: 'active' },
                 { id: 10, name: 'Turner', gender: 'boy', weight: '7lb 6oz', time: null, status: 'active' },
