@@ -35,7 +35,7 @@
         }
 
         .container {
-            max-width: 900px;
+            max-width: 1200px;
             margin: 0 auto;
             position: relative;
             z-index: 1;
@@ -50,6 +50,11 @@
             border: 2px solid #d4af37;
             border-radius: 5px;
             backdrop-filter: blur(10px);
+        }
+
+        .header .bear {
+            font-size: 4em;
+            margin-bottom: 15px;
         }
 
         .header h1 {
@@ -67,6 +72,23 @@
             color: #e8e8e8;
             font-style: italic;
             letter-spacing: 1px;
+            margin-bottom: 15px;
+        }
+
+        .live-clock {
+            font-family: 'Playfair Display', serif;
+            font-size: 2em;
+            color: #d4af37;
+            margin-top: 15px;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        .timezone {
+            font-size: 0.6em;
+            color: #e8e8e8;
+            opacity: 0.8;
+            margin-top: 5px;
         }
 
         .card {
@@ -137,6 +159,81 @@
             padding-bottom: 15px;
         }
 
+        .view-toggle {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 25px;
+        }
+
+        .toggle-btn {
+            padding: 12px 24px;
+            border: 2px solid #1a3a52;
+            background: white;
+            color: #1a3a52;
+            cursor: pointer;
+            font-family: 'Crimson Text', serif;
+            font-weight: 600;
+            font-size: 1em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.3s;
+        }
+
+        .toggle-btn.active {
+            background: #1a3a52;
+            color: white;
+            border-color: #d4af37;
+        }
+
+        .toggle-btn:hover {
+            border-color: #d4af37;
+        }
+
+        .bracket-view {
+            display: none;
+        }
+
+        .bracket-view.active {
+            display: block;
+        }
+
+        .list-view {
+            display: block;
+        }
+
+        .list-view.hidden {
+            display: none;
+        }
+
+        .bracket-columns {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 20px;
+        }
+
+        .bracket-column {
+            background: linear-gradient(to bottom, rgba(26, 58, 82, 0.05), transparent);
+            padding: 20px;
+            border: 2px solid #d4af37;
+        }
+
+        .bracket-column h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5em;
+            color: #1a3a52;
+            text-align: center;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .bracket-icon {
+            font-size: 2em;
+            margin-right: 5px;
+        }
+
         .predictions-list {
             display: grid;
             gap: 15px;
@@ -149,6 +246,7 @@
             border: 2px solid #1a3a52;
             background: linear-gradient(to right, rgba(26, 58, 82, 0.03), transparent);
             transition: all 0.3s;
+            position: relative;
         }
 
         .prediction-item:hover {
@@ -157,16 +255,75 @@
             transform: translateX(5px);
         }
 
+        .prediction-item.time-passed {
+            opacity: 0.4;
+            background: #f5f5f5;
+        }
+
+        .prediction-item.time-passed::after {
+            content: '⏰ Time Passed';
+            position: absolute;
+            top: 5px;
+            right: 10px;
+            font-size: 0.8em;
+            color: #999;
+            font-style: italic;
+        }
+
         .prediction-item.eliminated {
             opacity: 0.4;
             background: #f5f5f5;
             text-decoration: line-through;
         }
 
-        .prediction-item.winner {
+        .prediction-item.gender-winner {
+            border: 3px solid #8b4513;
+            background: linear-gradient(to right, rgba(139, 69, 19, 0.15), rgba(139, 69, 19, 0.05));
+            box-shadow: 0 0 20px rgba(139, 69, 19, 0.3);
+        }
+
+        .prediction-item.time-winner {
+            border: 3px solid #2d5f3f;
+            background: linear-gradient(to right, rgba(45, 95, 63, 0.15), rgba(45, 95, 63, 0.05));
+            box-shadow: 0 0 20px rgba(45, 95, 63, 0.3);
+        }
+
+        .prediction-item.ultimate-winner {
             border: 3px solid #d4af37;
             background: linear-gradient(to right, rgba(212, 175, 55, 0.15), rgba(212, 175, 55, 0.05));
             box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+        }
+
+        .winner-badge {
+            position: absolute;
+            top: 5px;
+            right: 10px;
+            font-size: 0.9em;
+            font-weight: 700;
+            padding: 5px 10px;
+            border-radius: 3px;
+        }
+
+        .winner-badge.gender {
+            background: #8b4513;
+            color: white;
+        }
+
+        .winner-badge.time {
+            background: #2d5f3f;
+            color: white;
+        }
+
+        .winner-badge.ultimate {
+            background: #d4af37;
+            color: #1a3a52;
+        }
+
+        .gender-icon {
+            font-size: 2.5em;
+            margin-right: 15px;
+            min-width: 50px;
+            text-align: center;
         }
 
         .prediction-info {
@@ -186,6 +343,17 @@
             color: #2d5f3f;
             font-size: 1.1em;
             line-height: 1.8;
+        }
+
+        .time-diff {
+            display: inline-block;
+            margin-left: 10px;
+            padding: 3px 8px;
+            background: rgba(45, 95, 63, 0.1);
+            border-radius: 3px;
+            font-size: 0.85em;
+            font-weight: 600;
+            color: #2d5f3f;
         }
 
         .gender-badge {
@@ -283,6 +451,122 @@
         .delete-btn:hover {
             background: #666;
             color: white;
+        }
+
+        .reveal-gender-btn {
+            padding: 15px 30px;
+            border: 3px solid #d4af37;
+            background: #1a3a52;
+            color: white;
+            cursor: pointer;
+            font-family: 'Playfair Display', serif;
+            font-weight: 700;
+            font-size: 1.2em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin: 20px auto;
+            display: block;
+            transition: all 0.3s;
+        }
+
+        .reveal-gender-btn:hover {
+            background: #d4af37;
+            color: #1a3a52;
+            transform: scale(1.05);
+        }
+
+        .gender-reveal-section {
+            text-align: center;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .reveal-inputs {
+            display: grid;
+            gap: 20px;
+            max-width: 600px;
+            margin: 20px auto;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .input-group label {
+            font-family: 'Playfair Display', serif;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #1a3a52;
+            font-size: 1.1em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .input-group input {
+            padding: 12px;
+            border: 2px solid #1a3a52;
+            background: white;
+            font-size: 16px;
+            font-family: 'Crimson Text', serif;
+        }
+
+        .gender-buttons-reveal {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .gender-reveal-btn {
+            padding: 20px 40px;
+            border: 3px solid;
+            background: white;
+            cursor: pointer;
+            font-family: 'Playfair Display', serif;
+            font-weight: 700;
+            font-size: 1.5em;
+            transition: all 0.3s;
+        }
+
+        .gender-reveal-btn.boy {
+            border-color: #1a3a52;
+            color: #1a3a52;
+        }
+
+        .gender-reveal-btn.boy:hover {
+            background: #1a3a52;
+            color: white;
+        }
+
+        .gender-reveal-btn.girl {
+            border-color: #8b4513;
+            color: #8b4513;
+        }
+
+        .gender-reveal-btn.girl:hover {
+            background: #8b4513;
+            color: white;
+        }
+
+        .submit-reveal-btn {
+            padding: 15px 40px;
+            border: 3px solid #d4af37;
+            background: #1a3a52;
+            color: white;
+            cursor: pointer;
+            font-family: 'Playfair Display', serif;
+            font-weight: 700;
+            font-size: 1.3em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 20px;
+            transition: all 0.3s;
+        }
+
+        .submit-reveal-btn:hover {
+            background: #d4af37;
+            color: #1a3a52;
         }
 
         .empty-state {
@@ -459,14 +743,26 @@
             color: white;
         }
 
-        @media (max-width: 600px) {
+        @media (max-width: 768px) {
+            .bracket-columns {
+                grid-template-columns: 1fr;
+            }
+
             .header h1 {
                 font-size: 2em;
             }
             
+            .live-clock {
+                font-size: 1.5em;
+            }
+
             .prediction-item {
                 flex-direction: column;
                 align-items: flex-start;
+            }
+
+            .gender-icon {
+                margin-bottom: 10px;
             }
             
             .prediction-actions {
@@ -477,15 +773,23 @@
             .action-btn {
                 flex: 1;
             }
+
+            .gender-buttons-reveal {
+                flex-direction: column;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <div style="font-size: 4em; margin-bottom: 15px;">🧸</div>
+            <div class="bear">🧸</div>
             <h1>Baby G</h1>
             <p>Prediction Tracker</p>
+            <div class="live-clock">
+                <div id="currentTime">--:--:--</div>
+                <div class="timezone">Austin, Texas</div>
+            </div>
         </div>
 
         <div class="card stats" id="stats" style="display: none;">
@@ -497,15 +801,75 @@
                 <div class="stat-number" id="stillInRunning">0</div>
                 <div class="stat-label">Still In Running</div>
             </div>
+            <div class="stat-box">
+                <div class="stat-number" id="teamBoy">0</div>
+                <div class="stat-label">🧢 Team Boy</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number" id="teamGirl">0</div>
+                <div class="stat-label">🎀 Team Girl</div>
+            </div>
+        </div>
+
+        <div class="card" id="genderRevealCard" style="display: none;">
+            <div class="gender-reveal-section">
+                <h2>🎉 Baby Has Arrived! 🎉</h2>
+                <p style="font-size: 1.2em; margin: 20px 0; color: #1a3a52;">Enter the birth details:</p>
+                
+                <div class="reveal-inputs">
+                    <div class="input-group">
+                        <label for="birthTime">Actual Birth Time</label>
+                        <input type="datetime-local" id="birthTime">
+                    </div>
+                    <div class="input-group">
+                        <label>Gender</label>
+                        <div class="gender-buttons-reveal">
+                            <button class="gender-reveal-btn boy" onclick="selectRevealGender('boy')">🧢 Boy</button>
+                            <button class="gender-reveal-btn girl" onclick="selectRevealGender('girl')">🎀 Girl</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <button class="submit-reveal-btn" onclick="submitReveal()">Reveal Winners! 🏆</button>
+            </div>
         </div>
 
         <div class="card">
-            <h2>Predictions</h2>
-            <div class="predictions-list" id="predictionsList">
-                <div class="empty-state">
-                    <p>Loading predictions...</p>
+            <div class="view-toggle">
+                <button class="toggle-btn active" onclick="switchView('list')">📋 List View</button>
+                <button class="toggle-btn" onclick="switchView('bracket')">🏆 Bracket View</button>
+            </div>
+
+            <div id="listView" class="list-view">
+                <h2>All Predictions</h2>
+                <div class="predictions-list" id="predictionsList">
+                    <div class="empty-state">
+                        <p>Loading predictions...</p>
+                    </div>
                 </div>
             </div>
+
+            <div id="bracketView" class="bracket-view">
+                <h2>Still In The Running</h2>
+                <div class="bracket-columns">
+                    <div class="bracket-column">
+                        <h3><span class="bracket-icon">🧢</span>Team Boy</h3>
+                        <div class="predictions-list" id="bracketBoy">
+                            <div class="empty-state">No predictions</div>
+                        </div>
+                    </div>
+                    <div class="bracket-column">
+                        <h3><span class="bracket-icon">🎀</span>Team Girl</h3>
+                        <div class="predictions-list" id="bracketGirl">
+                            <div class="empty-state">No predictions</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <button class="reveal-gender-btn" onclick="showGenderReveal()" style="margin-top: 30px;">
+                👶 Baby Has Arrived - Reveal Results
+            </button>
         </div>
     </div>
 
@@ -552,8 +916,140 @@
         let predictions = [];
         let editingId = null;
         let editSelectedGender = null;
+        let currentView = 'list';
+        let actualGender = null;
+        let actualBirthTime = null;
+        let selectedRevealGender = null;
 
-        // Gender button selection for edit modal
+        function updateClock() {
+            const now = new Date();
+            const austinTime = new Date(now.toLocaleString('en-US', { timeZone: 'America/Chicago' }));
+            const hours = austinTime.getHours();
+            const minutes = austinTime.getMinutes().toString().padStart(2, '0');
+            const seconds = austinTime.getSeconds().toString().padStart(2, '0');
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            const displayHours = hours % 12 || 12;
+            
+            document.getElementById('currentTime').textContent = 
+                `${displayHours}:${minutes}:${seconds} ${ampm}`;
+            
+            checkTimePassed();
+        }
+
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        function checkTimePassed() {
+            const now = new Date();
+            const austinNow = new Date(now.toLocaleString('en-US', { timeZone: 'America/Chicago' }));
+            
+            predictions.forEach(pred => {
+                if (pred.time && pred.status === 'active') {
+                    const predTime = new Date(pred.time);
+                    if (austinNow > predTime) {
+                        pred.status = 'time-passed';
+                    }
+                }
+            });
+            
+            savePredictions();
+        }
+
+        function switchView(view) {
+            currentView = view;
+            document.querySelectorAll('.toggle-btn').forEach(btn => btn.classList.remove('active'));
+            
+            if (view === 'list') {
+                document.getElementById('listView').classList.remove('hidden');
+                document.getElementById('bracketView').classList.remove('active');
+                event.target.classList.add('active');
+            } else {
+                document.getElementById('listView').classList.add('hidden');
+                document.getElementById('bracketView').classList.add('active');
+                event.target.classList.add('active');
+                renderBracket();
+            }
+        }
+
+        function showGenderReveal() {
+            document.getElementById('genderRevealCard').style.display = 'block';
+            document.getElementById('genderRevealCard').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function selectRevealGender(gender) {
+            selectedRevealGender = gender;
+            document.querySelectorAll('.gender-reveal-btn').forEach(btn => {
+                btn.style.opacity = '0.5';
+            });
+            event.target.style.opacity = '1';
+        }
+
+        function submitReveal() {
+            const birthTime = document.getElementById('birthTime').value;
+            
+            if (!birthTime || !selectedRevealGender) {
+                alert('Please enter both birth time and gender!');
+                return;
+            }
+
+            if (confirm(`Confirm: Baby G is a ${selectedRevealGender} born at ${new Date(birthTime).toLocaleString()}?`)) {
+                actualGender = selectedRevealGender;
+                actualBirthTime = new Date(birthTime);
+                
+                // Eliminate wrong gender predictions
+                predictions.forEach(pred => {
+                    if (pred.gender && pred.gender !== actualGender && !pred.winnerType) {
+                        pred.status = 'eliminated';
+                    }
+                });
+                
+                // Find closest time prediction
+                let closestPred = null;
+                let smallestDiff = Infinity;
+                
+                predictions.forEach(pred => {
+                    if (pred.time) {
+                        const predTime = new Date(pred.time);
+                        const diff = Math.abs(actualBirthTime - predTime);
+                        if (diff < smallestDiff) {
+                            smallestDiff = diff;
+                            closestPred = pred;
+                        }
+                    }
+                });
+                
+                // Award winners
+                if (closestPred) {
+                    closestPred.timeDifference = smallestDiff;
+                    
+                    if (closestPred.gender === actualGender) {
+                        // Ultimate winner - both correct!
+                        closestPred.winnerType = 'ultimate';
+                        closestPred.status = 'winner';
+                    } else {
+                        // Time winner only
+                        closestPred.winnerType = 'time';
+                        closestPred.status = 'winner';
+                    }
+                }
+                
+                // Find gender winner (if different from ultimate winner)
+                predictions.forEach(pred => {
+                    if (pred.gender === actualGender && !pred.winnerType && pred.status !== 'eliminated') {
+                        pred.winnerType = 'gender';
+                        pred.status = 'winner';
+                    }
+                });
+                
+                savePredictions();
+                renderPredictions();
+                renderBracket();
+                
+                document.getElementById('genderRevealCard').style.display = 'none';
+                alert(`🎉 Winners revealed! Check the list to see who won!`);
+            }
+        }
+
         document.querySelectorAll('.gender-btn').forEach(btn => {
             btn.addEventListener('click', function() {
                 if (this.id === 'editBoyBtn' || this.id === 'editGirlBtn') {
@@ -565,6 +1061,23 @@
             });
         });
 
+        function getGenderIcon(gender) {
+            if (gender === 'boy') return '🧢';
+            if (gender === 'girl') return '🎀';
+            return '❓';
+        }
+
+        function formatTimeDifference(milliseconds) {
+            const totalMinutes = Math.floor(milliseconds / 60000);
+            const hours = Math.floor(totalMinutes / 60);
+            const minutes = totalMinutes % 60;
+            
+            if (hours > 0) {
+                return `${hours}h ${minutes}m off`;
+            }
+            return `${minutes}m off`;
+        }
+
         function editPrediction(id) {
             const pred = predictions.find(p => p.id === id);
             if (!pred) return;
@@ -572,12 +1085,10 @@
             editingId = id;
             editSelectedGender = pred.gender;
 
-            // Populate modal with current values
             document.getElementById('editName').value = pred.name;
             document.getElementById('editTime').value = pred.time || '';
             document.getElementById('editWeight').value = pred.weight || '';
 
-            // Set gender buttons
             document.getElementById('editBoyBtn').classList.remove('selected');
             document.getElementById('editGirlBtn').classList.remove('selected');
             if (pred.gender === 'boy') {
@@ -586,7 +1097,6 @@
                 document.getElementById('editGirlBtn').classList.add('selected');
             }
 
-            // Show modal
             document.getElementById('editModal').classList.add('active');
         }
 
@@ -613,15 +1123,111 @@
 
             savePredictions();
             renderPredictions();
+            renderBracket();
             closeEditModal();
         }
 
-        // Close modal when clicking outside
         document.getElementById('editModal').addEventListener('click', function(e) {
             if (e.target === this) {
                 closeEditModal();
             }
         });
+
+        function renderBracket() {
+            const boyContainer = document.getElementById('bracketBoy');
+            const girlContainer = document.getElementById('bracketGirl');
+            
+            const activeBoys = predictions.filter(p => 
+                p.gender === 'boy' && (p.status === 'active' || p.status === 'winner')
+            );
+            const activeGirls = predictions.filter(p => 
+                p.gender === 'girl' && (p.status === 'active' || p.status === 'winner')
+            );
+            
+            boyContainer.innerHTML = activeBoys.length > 0 
+                ? activeBoys.map(pred => renderPredictionCard(pred, false)).join('')
+                : '<div class="empty-state">No active boy predictions</div>';
+                
+            girlContainer.innerHTML = activeGirls.length > 0 
+                ? activeGirls.map(pred => renderPredictionCard(pred, false)).join('')
+                : '<div class="empty-state">No active girl predictions</div>';
+        }
+
+        function renderPredictionCard(pred, showActions = true) {
+            let timeDisplay = '';
+            if (pred.time) {
+                const date = new Date(pred.time);
+                const formattedDate = date.toLocaleDateString('en-US', { 
+                    month: 'short', 
+                    day: 'numeric'
+                });
+                const formattedTime = date.toLocaleTimeString('en-US', { 
+                    hour: 'numeric', 
+                    minute: '2-digit',
+                    hour12: true 
+                });
+                timeDisplay = `${formattedDate} at ${formattedTime}`;
+                
+                if (pred.timeDifference !== undefined) {
+                    timeDisplay += ` <span class="time-diff">${formatTimeDifference(pred.timeDifference)}</span>`;
+                }
+            }
+
+            let detailsHTML = '<div>';
+            if (pred.gender) {
+                detailsHTML += `<span class="gender-badge ${pred.gender}">${pred.gender === 'boy' ? 'Boy' : 'Girl'}</span>`;
+            }
+            if (pred.weight) {
+                detailsHTML += `<span class="weight-badge">${pred.weight}</span>`;
+            }
+            if (timeDisplay) {
+                detailsHTML += `<br><span style="font-style: italic;">${timeDisplay}</span>`;
+            }
+            if (!pred.gender && !pred.weight && !timeDisplay) {
+                detailsHTML += '<span style="color: #999; font-style: italic;">No predictions specified</span>';
+            }
+            detailsHTML += '</div>';
+
+            let statusClass = '';
+            let winnerBadgeHTML = '';
+            
+            if (pred.winnerType === 'ultimate') {
+                statusClass = 'ultimate-winner';
+                winnerBadgeHTML = '<span class="winner-badge ultimate">👑 ULTIMATE WINNER!</span>';
+            } else if (pred.winnerType === 'gender') {
+                statusClass = 'gender-winner';
+                winnerBadgeHTML = '<span class="winner-badge gender">🎀 Gender Winner</span>';
+            } else if (pred.winnerType === 'time') {
+                statusClass = 'time-winner';
+                winnerBadgeHTML = '<span class="winner-badge time">⏰ Closest Time</span>';
+            } else if (pred.status === 'time-passed') {
+                statusClass = 'time-passed';
+            } else if (pred.status === 'eliminated') {
+                statusClass = 'eliminated';
+            }
+
+            return `
+                <div class="prediction-item ${statusClass}">
+                    ${winnerBadgeHTML}
+                    <div class="gender-icon">${getGenderIcon(pred.gender)}</div>
+                    <div class="prediction-info">
+                        <div class="prediction-name">${pred.name}</div>
+                        <div class="prediction-details">
+                            ${detailsHTML}
+                        </div>
+                    </div>
+                    ${showActions ? `
+                    <div class="prediction-actions">
+                        ${pred.status === 'time-passed' || pred.status === 'eliminated' ? `
+                            <button class="action-btn" style="border-color: #2d5f3f; color: #2d5f3f;" onclick="reactivate(${pred.id})">Reactivate</button>
+                        ` : ''}
+                        <button class="action-btn edit-btn" onclick="editPrediction(${pred.id})">Edit</button>
+                        <button class="action-btn delete-btn" onclick="deletePrediction(${pred.id})">Delete</button>
+                    </div>
+                    ` : ''}
+                </div>
+            `;
+        }
 
         function renderPredictions() {
             const container = document.getElementById('predictionsList');
@@ -634,7 +1240,6 @@
 
             document.getElementById('stats').style.display = 'grid';
             
-            // Sort by time (nulls at the end)
             const sortedPredictions = [...predictions].sort((a, b) => {
                 if (!a.time && !b.time) return 0;
                 if (!a.time) return 1;
@@ -642,75 +1247,20 @@
                 return new Date(a.time) - new Date(b.time);
             });
             
-            container.innerHTML = sortedPredictions.map(pred => {
-                let timeDisplay = '';
-                if (pred.time) {
-                    const date = new Date(pred.time);
-                    const formattedDate = date.toLocaleDateString('en-US', { 
-                        month: 'short', 
-                        day: 'numeric'
-                    });
-                    const formattedTime = date.toLocaleTimeString('en-US', { 
-                        hour: 'numeric', 
-                        minute: '2-digit',
-                        hour12: true 
-                    });
-                    timeDisplay = `${formattedDate} at ${formattedTime}`;
-                }
-
-                let detailsHTML = '<div>';
-                if (pred.gender) {
-                    detailsHTML += `<span class="gender-badge ${pred.gender}">${pred.gender === 'boy' ? 'Boy' : 'Girl'}</span>`;
-                }
-                if (pred.weight) {
-                    detailsHTML += `<span class="weight-badge">${pred.weight}</span>`;
-                }
-                if (timeDisplay) {
-                    detailsHTML += `<br><span style="font-style: italic;">${timeDisplay}</span>`;
-                }
-                if (!pred.gender && !pred.weight && !timeDisplay) {
-                    detailsHTML += '<span style="color: #999; font-style: italic;">No predictions specified</span>';
-                }
-                detailsHTML += '</div>';
-
-                return `
-                    <div class="prediction-item ${pred.status === 'eliminated' ? 'eliminated' : ''} ${pred.status === 'winner' ? 'winner' : ''}">
-                        <div class="prediction-info">
-                            <div class="prediction-name">${pred.name}</div>
-                            <div class="prediction-details">
-                                ${detailsHTML}
-                            </div>
-                        </div>
-                        <div class="prediction-actions">
-                            ${pred.status === 'active' ? `
-                                <button class="action-btn eliminate-btn" onclick="eliminatePrediction(${pred.id})">Wrong</button>
-                                <button class="action-btn winner-btn" onclick="markWinner(${pred.id})">Winner</button>
-                            ` : ''}
-                            <button class="action-btn edit-btn" onclick="editPrediction(${pred.id})">Edit</button>
-                            <button class="action-btn delete-btn" onclick="deletePrediction(${pred.id})">Delete</button>
-                        </div>
-                    </div>
-                `;
-            }).join('');
+            container.innerHTML = sortedPredictions.map(pred => renderPredictionCard(pred, true)).join('');
 
             updateStats();
         }
 
-        function eliminatePrediction(id) {
+        function reactivate(id) {
             const pred = predictions.find(p => p.id === id);
             if (pred) {
-                pred.status = 'eliminated';
+                pred.status = 'active';
+                delete pred.winnerType;
+                delete pred.timeDifference;
                 savePredictions();
                 renderPredictions();
-            }
-        }
-
-        function markWinner(id) {
-            const pred = predictions.find(p => p.id === id);
-            if (pred) {
-                pred.status = 'winner';
-                savePredictions();
-                renderPredictions();
+                renderBracket();
             }
         }
 
@@ -719,19 +1269,26 @@
                 predictions = predictions.filter(p => p.id !== id);
                 savePredictions();
                 renderPredictions();
+                renderBracket();
             }
         }
 
         function updateStats() {
             const total = predictions.length;
             const active = predictions.filter(p => p.status === 'active').length;
+            const boys = predictions.filter(p => p.gender === 'boy' && (p.status === 'active' || p.status === 'winner')).length;
+            const girls = predictions.filter(p => p.gender === 'girl' && (p.status === 'active' || p.status === 'winner')).length;
             
             document.getElementById('totalPredictions').textContent = total;
             document.getElementById('stillInRunning').textContent = active;
+            document.getElementById('teamBoy').textContent = boys;
+            document.getElementById('teamGirl').textContent = girls;
         }
 
         function savePredictions() {
             localStorage.setItem('babyGPredictions', JSON.stringify(predictions));
+            localStorage.setItem('babyGActualGender', actualGender);
+            localStorage.setItem('babyGActualTime', actualBirthTime ? actualBirthTime.toISOString() : null);
         }
 
         function loadPredictions() {
@@ -739,12 +1296,16 @@
             if (saved) {
                 predictions = JSON.parse(saved);
             }
+            
+            const savedGender = localStorage.getItem('babyGActualGender');
+            if (savedGender) actualGender = savedGender;
+            
+            const savedTime = localStorage.getItem('babyGActualTime');
+            if (savedTime && savedTime !== 'null') actualBirthTime = new Date(savedTime);
         }
 
-        // Load predictions on page load
         loadPredictions();
 
-        // Pre-populate predictions if empty
         if (predictions.length === 0) {
             predictions = [
                 { id: 1, name: 'Lin', gender: null, weight: '7lb 14oz', time: '2026-02-12T16:00', status: 'active' },
@@ -765,8 +1326,8 @@
             savePredictions();
         }
         
-        // Always render predictions after loading/initializing
         renderPredictions();
+        renderBracket();
     </script>
 </body>
 </html>
