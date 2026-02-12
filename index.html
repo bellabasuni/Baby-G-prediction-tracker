@@ -738,7 +738,6 @@
             const saved = localStorage.getItem('babyGPredictions');
             if (saved) {
                 predictions = JSON.parse(saved);
-                renderPredictions();
             }
         }
 
@@ -764,8 +763,10 @@
                 { id: 14, name: 'Dr. Oliver', gender: null, weight: null, time: '2026-02-12T17:44', status: 'active' }
             ];
             savePredictions();
-            renderPredictions();
         }
+        
+        // Always render predictions after loading/initializing
+        renderPredictions();
     </script>
 </body>
 </html>
