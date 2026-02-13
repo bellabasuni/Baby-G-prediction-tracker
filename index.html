@@ -1077,12 +1077,16 @@
                 
                 if (actualBirthWeight) {
                     const actualOz = parseWeightToOunces(actualBirthWeight);
+                    console.log('Actual weight:', actualBirthWeight, '=', actualOz, 'oz');
+                    
                     if (actualOz !== null) {
                         predictions.forEach(pred => {
                             if (pred.weight) {
                                 const predOz = parseWeightToOunces(pred.weight);
+                                const diff = Math.abs(actualOz - predOz);
+                                console.log(pred.name, ':', pred.weight, '=', predOz, 'oz, diff:', diff, 'oz');
+                                
                                 if (predOz !== null) {
-                                    const diff = Math.abs(actualOz - predOz);
                                     if (diff < smallestWeightDiff) {
                                         smallestWeightDiff = diff;
                                         closestWeightPred = pred;
@@ -1090,7 +1094,10 @@
                                 }
                             }
                         });
+                        console.log('Closest weight winner:', closestWeightPred?.name, 'off by', smallestWeightDiff, 'oz');
                     }
+                } else {
+                    console.log('No actual birth weight entered - skipping weight winner calculation');
                 }
                 
                 // Check for ultimate winner (correct gender + closest time + closest weight)
@@ -1107,18 +1114,25 @@
                     ultimateWinner.status = 'winner';
                     ultimateWinner.timeDifference = smallestTimeDiff;
                     ultimateWinner.weightDifference = smallestWeightDiff;
+                    console.log('Ultimate winner:', ultimateWinner.name);
                 } else {
                     // Award individual category winners
                     if (closestTimePred) {
                         closestTimePred.timeDifference = smallestTimeDiff;
                         closestTimePred.winnerType = 'time';
                         closestTimePred.status = 'winner';
+                        console.log('Time winner:', closestTimePred.name);
                     }
                     
                     if (closestWeightPred) {
                         closestWeightPred.weightDifference = smallestWeightDiff;
-                        closestWeightPred.winnerType = 'weight';
+                        
+                        // Don't overwrite if they already won time
+                        if (!closestWeightPred.winnerType) {
+                            closestWeightPred.winnerType = 'weight';
+                        }
                         closestWeightPred.status = 'winner';
+                        console.log('Weight winner:', closestWeightPred.name);
                     }
                     
                     // Find gender winner (correct gender, not eliminated, not already a winner)
@@ -1128,6 +1142,7 @@
                             pred.winnerType = 'gender';
                             pred.status = 'winner';
                             foundGenderWinner = true;
+                            console.log('Gender winner:', pred.name);
                         }
                     });
                 }
@@ -1406,8 +1421,10 @@
                         ${pred.status === 'time-passed' || pred.status === 'eliminated' ? `
                             <button class="action-btn" style="border-color: #2d5f3f; color: #2d5f3f;" onclick="reactivate(${pred.id})">Reactivate</button>
                         ` : ''}
-                        <button class="action-btn edit-btn" onclick="editPrediction(${pred.id})">Edit</button>
-                        <button class="action-btn delete-btn" onclick="deletePrediction(${pred.id})">Delete</button>
+                        ${pred.status !== 'winner' ? `
+                            <button class="action-btn edit-btn" onclick="editPrediction(${pred.id})">Edit</button>
+                            <button class="action-btn delete-btn" onclick="deletePrediction(${pred.id})">Delete</button>
+                        ` : ''}
                     </div>
                     ` : ''}
                 </div>
