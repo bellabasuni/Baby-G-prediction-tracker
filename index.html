@@ -288,6 +288,12 @@
             box-shadow: 0 0 20px rgba(45, 95, 63, 0.3);
         }
 
+        .prediction-item.weight-winner {
+            border: 3px solid #9c6644;
+            background: linear-gradient(to right, rgba(156, 102, 68, 0.15), rgba(156, 102, 68, 0.05));
+            box-shadow: 0 0 20px rgba(156, 102, 68, 0.3);
+        }
+
         .prediction-item.ultimate-winner {
             border: 3px solid #d4af37;
             background: linear-gradient(to right, rgba(212, 175, 55, 0.15), rgba(212, 175, 55, 0.05));
@@ -311,6 +317,11 @@
 
         .winner-badge.time {
             background: #2d5f3f;
+            color: white;
+        }
+
+        .winner-badge.weight {
+            background: #9c6644;
             color: white;
         }
 
@@ -822,6 +833,10 @@
                         <input type="datetime-local" id="birthTime">
                     </div>
                     <div class="input-group">
+                        <label for="birthWeight">Actual Birth Weight</label>
+                        <input type="text" id="birthWeight" placeholder="e.g., 7lb 12oz">
+                    </div>
+                    <div class="input-group">
                         <label>Gender</label>
                         <div class="gender-buttons-reveal">
                             <button class="gender-reveal-btn boy" onclick="selectRevealGender('boy')">🧢 Boy</button>
@@ -919,6 +934,7 @@
         let currentView = 'list';
         let actualGender = null;
         let actualBirthTime = null;
+        let actualBirthWeight = null;
         let selectedRevealGender = null;
 
         function updateClock() {
@@ -986,15 +1002,17 @@
 
         function submitReveal() {
             const birthTime = document.getElementById('birthTime').value;
+            const birthWeight = document.getElementById('birthWeight').value.trim();
             
             if (!birthTime || !selectedRevealGender) {
-                alert('Please enter both birth time and gender!');
+                alert('Please enter birth time and gender!');
                 return;
             }
 
-            if (confirm(`Confirm: Baby G is a ${selectedRevealGender} born at ${new Date(birthTime).toLocaleString()}?`)) {
+            if (confirm(`Confirm: Baby G is a ${selectedRevealGender} born at ${new Date(birthTime).toLocaleString()}${birthWeight ? ' weighing ' + birthWeight : ''}?`)) {
                 actualGender = selectedRevealGender;
                 actualBirthTime = new Date(birthTime);
+                actualBirthWeight = birthWeight || null;
                 
                 // Eliminate wrong gender predictions
                 predictions.forEach(pred => {
@@ -1004,42 +1022,78 @@
                 });
                 
                 // Find closest time prediction
-                let closestPred = null;
-                let smallestDiff = Infinity;
+                let closestTimePred = null;
+                let smallestTimeDiff = Infinity;
                 
                 predictions.forEach(pred => {
                     if (pred.time) {
                         const predTime = new Date(pred.time);
                         const diff = Math.abs(actualBirthTime - predTime);
-                        if (diff < smallestDiff) {
-                            smallestDiff = diff;
-                            closestPred = pred;
+                        if (diff < smallestTimeDiff) {
+                            smallestTimeDiff = diff;
+                            closestTimePred = pred;
                         }
                     }
                 });
                 
-                // Award winners
-                if (closestPred) {
-                    closestPred.timeDifference = smallestDiff;
-                    
-                    if (closestPred.gender === actualGender) {
-                        // Ultimate winner - both correct!
-                        closestPred.winnerType = 'ultimate';
-                        closestPred.status = 'winner';
-                    } else {
-                        // Time winner only
-                        closestPred.winnerType = 'time';
-                        closestPred.status = 'winner';
+                // Find closest weight prediction (if actual weight provided)
+                let closestWeightPred = null;
+                let smallestWeightDiff = Infinity;
+                
+                if (actualBirthWeight) {
+                    const actualOz = parseWeightToOunces(actualBirthWeight);
+                    if (actualOz !== null) {
+                        predictions.forEach(pred => {
+                            if (pred.weight) {
+                                const predOz = parseWeightToOunces(pred.weight);
+                                if (predOz !== null) {
+                                    const diff = Math.abs(actualOz - predOz);
+                                    if (diff < smallestWeightDiff) {
+                                        smallestWeightDiff = diff;
+                                        closestWeightPred = pred;
+                                    }
+                                }
+                            }
+                        });
                     }
                 }
                 
-                // Find gender winner (if different from ultimate winner)
-                predictions.forEach(pred => {
-                    if (pred.gender === actualGender && !pred.winnerType && pred.status !== 'eliminated') {
-                        pred.winnerType = 'gender';
-                        pred.status = 'winner';
+                // Check for ultimate winner (correct gender + closest time + closest weight)
+                let ultimateWinner = null;
+                if (closestTimePred && closestWeightPred && 
+                    closestTimePred.id === closestWeightPred.id && 
+                    closestTimePred.gender === actualGender) {
+                    ultimateWinner = closestTimePred;
+                }
+                
+                // Award winners
+                if (ultimateWinner) {
+                    ultimateWinner.winnerType = 'ultimate';
+                    ultimateWinner.status = 'winner';
+                    ultimateWinner.timeDifference = smallestTimeDiff;
+                    ultimateWinner.weightDifference = smallestWeightDiff;
+                } else {
+                    // Award individual category winners
+                    if (closestTimePred) {
+                        closestTimePred.timeDifference = smallestTimeDiff;
+                        closestTimePred.winnerType = 'time';
+                        closestTimePred.status = 'winner';
                     }
-                });
+                    
+                    if (closestWeightPred) {
+                        closestWeightPred.weightDifference = smallestWeightDiff;
+                        closestWeightPred.winnerType = 'weight';
+                        closestWeightPred.status = 'winner';
+                    }
+                    
+                    // Find gender winner (if different from time/weight winners)
+                    predictions.forEach(pred => {
+                        if (pred.gender === actualGender && !pred.winnerType && pred.status !== 'eliminated') {
+                            pred.winnerType = 'gender';
+                            pred.status = 'winner';
+                        }
+                    });
+                }
                 
                 savePredictions();
                 renderPredictions();
@@ -1047,6 +1101,39 @@
                 
                 document.getElementById('genderRevealCard').style.display = 'none';
                 alert(`🎉 Winners revealed! Check the list to see who won!`);
+            }
+        }
+
+        // Helper function to parse weight strings to ounces
+        function parseWeightToOunces(weightStr) {
+            if (!weightStr) return null;
+            
+            // Remove extra spaces
+            weightStr = weightStr.trim().toLowerCase();
+            
+            let pounds = 0;
+            let ounces = 0;
+            
+            // Match patterns like "7lb 12oz", "7 lb 12 oz", "7lbs 12ozs", etc.
+            const lbMatch = weightStr.match(/(\d+)\s*lbs?/);
+            const ozMatch = weightStr.match(/(\d+)\s*ozs?/);
+            
+            if (lbMatch) pounds = parseInt(lbMatch[1]);
+            if (ozMatch) ounces = parseInt(ozMatch[1]);
+            
+            return (pounds * 16) + ounces;
+        }
+
+        function formatWeightDifference(ounces) {
+            const lbs = Math.floor(ounces / 16);
+            const oz = ounces % 16;
+            
+            if (lbs > 0 && oz > 0) {
+                return `${lbs}lb ${oz}oz off`;
+            } else if (lbs > 0) {
+                return `${lbs}lb off`;
+            } else {
+                return `${oz}oz off`;
             }
         }
 
@@ -1186,7 +1273,11 @@
                 detailsHTML += `<span class="gender-badge ${pred.gender}">${pred.gender === 'boy' ? 'Boy' : 'Girl'}</span>`;
             }
             if (pred.weight) {
-                detailsHTML += `<span class="weight-badge">${pred.weight}</span>`;
+                let weightText = pred.weight;
+                if (pred.weightDifference !== undefined) {
+                    weightText += ` <span class="time-diff">${formatWeightDifference(pred.weightDifference)}</span>`;
+                }
+                detailsHTML += `<span class="weight-badge">${weightText}</span>`;
             }
             if (timeDisplay) {
                 detailsHTML += `<br><span style="font-style: italic;">${timeDisplay}</span>`;
@@ -1208,6 +1299,9 @@
             } else if (pred.winnerType === 'time') {
                 statusClass = 'time-winner';
                 winnerBadgeHTML = '<span class="winner-badge time">⏰ Closest Time</span>';
+            } else if (pred.winnerType === 'weight') {
+                statusClass = 'weight-winner';
+                winnerBadgeHTML = '<span class="winner-badge weight">⚖️ Closest Weight</span>';
             } else if (pred.status === 'time-passed') {
                 statusClass = 'time-passed';
             } else if (pred.status === 'eliminated') {
@@ -1297,6 +1391,7 @@
             localStorage.setItem('babyGPredictions', JSON.stringify(predictions));
             localStorage.setItem('babyGActualGender', actualGender);
             localStorage.setItem('babyGActualTime', actualBirthTime ? actualBirthTime.toISOString() : null);
+            localStorage.setItem('babyGActualWeight', actualBirthWeight);
         }
 
         function loadPredictions() {
@@ -1310,6 +1405,9 @@
             
             const savedTime = localStorage.getItem('babyGActualTime');
             if (savedTime && savedTime !== 'null') actualBirthTime = new Date(savedTime);
+            
+            const savedWeight = localStorage.getItem('babyGActualWeight');
+            if (savedWeight && savedWeight !== 'null') actualBirthWeight = savedWeight;
         }
 
         loadPredictions();
