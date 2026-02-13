@@ -300,6 +300,18 @@
             box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
         }
 
+        .prediction-item.overall-champion {
+            border: 4px solid #d4af37;
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.25), rgba(212, 175, 55, 0.1));
+            box-shadow: 0 0 30px rgba(212, 175, 55, 0.5);
+            animation: glow 2s ease-in-out infinite;
+        }
+
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 30px rgba(212, 175, 55, 0.5); }
+            50% { box-shadow: 0 0 40px rgba(212, 175, 55, 0.8); }
+        }
+
         .winner-badge {
             position: absolute;
             top: 5px;
@@ -328,6 +340,19 @@
         .winner-badge.ultimate {
             background: #d4af37;
             color: #1a3a52;
+        }
+
+        .winner-badge.champion {
+            background: linear-gradient(135deg, #d4af37, #ffd700);
+            color: #1a3a52;
+            font-size: 1.1em;
+            padding: 6px 12px;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
         }
 
         .gender-icon {
@@ -885,6 +910,13 @@
             <button class="reveal-gender-btn" onclick="showGenderReveal()" style="margin-top: 30px;">
                 👶 Baby Has Arrived - Reveal Results
             </button>
+            
+            <div style="text-align: center; margin-top: 20px; padding: 20px; border-top: 2px solid #d4af37;">
+                <button class="action-btn" style="margin: 10px;" onclick="exportData()">📤 Export Data</button>
+                <button class="action-btn" style="margin: 10px;" onclick="importData()">📥 Import Data</button>
+                <button class="action-btn delete-btn" style="margin: 10px;" onclick="clearAllData()">🗑️ Clear All Data</button>
+                <p style="margin-top: 10px; color: #666; font-size: 0.9em;">Use Export/Import to sync data between phone and computer</p>
+            </div>
         </div>
     </div>
 
@@ -956,19 +988,9 @@
         updateClock();
 
         function checkTimePassed() {
-            const now = new Date();
-            const austinNow = new Date(now.toLocaleString('en-US', { timeZone: 'America/Chicago' }));
-            
-            predictions.forEach(pred => {
-                if (pred.time && pred.status === 'active') {
-                    const predTime = new Date(pred.time);
-                    if (austinNow > predTime) {
-                        pred.status = 'time-passed';
-                    }
-                }
-            });
-            
-            savePredictions();
+            // Don't auto-eliminate based on time passing
+            // People can still win "closest time" even if their time passed
+            // We'll only eliminate when gender is revealed
         }
 
         function switchView(view) {
@@ -1014,14 +1036,27 @@
                 actualBirthTime = new Date(birthTime);
                 actualBirthWeight = birthWeight || null;
                 
-                // Eliminate wrong gender predictions
+                // Reset all predictions to active first (remove time-passed status)
                 predictions.forEach(pred => {
-                    if (pred.gender && pred.gender !== actualGender && !pred.winnerType) {
+                    if (pred.status === 'time-passed') {
+                        pred.status = 'active';
+                    }
+                    // Clear any previous winner status
+                    delete pred.winnerType;
+                    delete pred.timeDifference;
+                    delete pred.weightDifference;
+                    delete pred.isChampion;
+                    delete pred.championWins;
+                });
+                
+                // Now eliminate ONLY wrong gender predictions
+                predictions.forEach(pred => {
+                    if (pred.gender && pred.gender !== actualGender) {
                         pred.status = 'eliminated';
                     }
                 });
                 
-                // Find closest time prediction
+                // Find closest time prediction (from ALL predictions, including eliminated ones)
                 let closestTimePred = null;
                 let smallestTimeDiff = Infinity;
                 
@@ -1036,7 +1071,7 @@
                     }
                 });
                 
-                // Find closest weight prediction (if actual weight provided)
+                // Find closest weight prediction (from ALL predictions, including eliminated ones)
                 let closestWeightPred = null;
                 let smallestWeightDiff = Infinity;
                 
@@ -1086,13 +1121,49 @@
                         closestWeightPred.status = 'winner';
                     }
                     
-                    // Find gender winner (if different from time/weight winners)
+                    // Find gender winner (correct gender, not eliminated, not already a winner)
+                    let foundGenderWinner = false;
                     predictions.forEach(pred => {
-                        if (pred.gender === actualGender && !pred.winnerType && pred.status !== 'eliminated') {
+                        if (pred.gender === actualGender && !pred.winnerType && !foundGenderWinner) {
                             pred.winnerType = 'gender';
                             pred.status = 'winner';
+                            foundGenderWinner = true;
                         }
                     });
+                }
+                
+                // Calculate Overall Champion - person who won the most categories
+                // Count wins per person
+                const winCounts = {};
+                predictions.forEach(pred => {
+                    if (pred.status === 'winner') {
+                        winCounts[pred.id] = 0;
+                        
+                        // Count categories won
+                        if (pred.gender === actualGender) winCounts[pred.id]++;
+                        if (pred.id === closestTimePred?.id) winCounts[pred.id]++;
+                        if (pred.id === closestWeightPred?.id) winCounts[pred.id]++;
+                    }
+                });
+                
+                // Find person with most wins (must have at least 2)
+                let championId = null;
+                let maxWins = 1; // Need at least 2 to be champion
+                
+                for (const [id, wins] of Object.entries(winCounts)) {
+                    if (wins > maxWins) {
+                        maxWins = wins;
+                        championId = parseInt(id);
+                    }
+                }
+                
+                // Award Overall Champion
+                if (championId) {
+                    const champion = predictions.find(p => p.id === championId);
+                    if (champion) {
+                        champion.isChampion = true;
+                        champion.championWins = maxWins;
+                    }
                 }
                 
                 savePredictions();
@@ -1100,7 +1171,16 @@
                 renderBracket();
                 
                 document.getElementById('genderRevealCard').style.display = 'none';
-                alert(`🎉 Winners revealed! Check the list to see who won!`);
+                
+                // Show champion announcement if there is one
+                if (championId) {
+                    const champion = predictions.find(p => p.id === championId);
+                    setTimeout(() => {
+                        alert(`🏆 OVERALL CHAMPION: ${champion.name}!\nWon ${maxWins} out of 3 categories! 🎉`);
+                    }, 500);
+                } else {
+                    alert(`🎉 Winners revealed! Check the list to see who won!`);
+                }
             }
         }
 
@@ -1290,7 +1370,10 @@
             let statusClass = '';
             let winnerBadgeHTML = '';
             
-            if (pred.winnerType === 'ultimate') {
+            if (pred.isChampion) {
+                statusClass = 'overall-champion';
+                winnerBadgeHTML = `<span class="winner-badge champion">🏆 OVERALL CHAMPION (${pred.championWins}/3)!</span>`;
+            } else if (pred.winnerType === 'ultimate') {
                 statusClass = 'ultimate-winner';
                 winnerBadgeHTML = '<span class="winner-badge ultimate">👑 ULTIMATE WINNER!</span>';
             } else if (pred.winnerType === 'gender') {
@@ -1360,9 +1443,78 @@
                 pred.status = 'active';
                 delete pred.winnerType;
                 delete pred.timeDifference;
+                delete pred.weightDifference;
+                delete pred.isChampion;
+                delete pred.championWins;
                 savePredictions();
                 renderPredictions();
                 renderBracket();
+            }
+        }
+
+        function exportData() {
+            const data = {
+                predictions: predictions,
+                actualGender: actualGender,
+                actualBirthTime: actualBirthTime ? actualBirthTime.toISOString() : null,
+                actualBirthWeight: actualBirthWeight
+            };
+            
+            const dataStr = JSON.stringify(data);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'baby-g-predictions.json';
+            link.click();
+            URL.revokeObjectURL(url);
+            
+            alert('Data exported! Share this file to sync across devices.');
+        }
+
+        function importData() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = (e) => {
+                const file = e.target.files[0];
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    try {
+                        const data = JSON.parse(event.target.result);
+                        predictions = data.predictions || [];
+                        actualGender = data.actualGender || null;
+                        actualBirthTime = data.actualBirthTime ? new Date(data.actualBirthTime) : null;
+                        actualBirthWeight = data.actualBirthWeight || null;
+                        
+                        savePredictions();
+                        renderPredictions();
+                        renderBracket();
+                        
+                        alert('Data imported successfully!');
+                    } catch (err) {
+                        alert('Error importing file. Please make sure it\'s a valid Baby G predictions file.');
+                    }
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        }
+
+        function clearAllData() {
+            if (confirm('⚠️ WARNING: This will delete ALL predictions and reset everything. Are you sure?')) {
+                if (confirm('Really sure? This cannot be undone!')) {
+                    localStorage.clear();
+                    predictions = [];
+                    actualGender = null;
+                    actualBirthTime = null;
+                    actualBirthWeight = null;
+                    selectedRevealGender = null;
+                    renderPredictions();
+                    renderBracket();
+                    alert('All data cleared! Refresh the page to start fresh.');
+                    location.reload();
+                }
             }
         }
 
